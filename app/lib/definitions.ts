@@ -86,3 +86,12 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+export type InvoiceFormState = {
+  message: string | null;
+  errors?: {
+    customer_id?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+};
