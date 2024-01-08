@@ -5,6 +5,8 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { type InvoiceFormState } from './definitions';
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 
 const InvoiceSchema = z.object({
   id: z.string({ invalid_type_error: 'Select a customer' }),
@@ -81,5 +83,24 @@ export async function deleteInvoice(id: string) {
     revalidatePath('/dashboard/invoices');
   } catch (error) {
     return { message: 'DB error: Failed to delete invoice' };
+  }
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials';
+        default:
+          return 'There was an error. Something went wrong...';
+      }
+    }
+    throw error;
   }
 }
